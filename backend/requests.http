@@ -1,0 +1,99 @@
+@base = http://localhost:3000/api
+@token = COLE_O_TOKEN_RECEBIDO_NO_LOGIN
+@usuarioId = 1
+@contaId = 1
+@categoriaReceitaId = 1
+@categoriaDespesaId = 2
+@transacaoId = 1
+
+### Conexão
+GET {{base}}/health
+
+### Cadastro público (troque a senha de exemplo; não use credenciais reais neste arquivo)
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{"nome":"Pessoa exemplo","email":"exemplo@example.com","senha":"Senha-exemplo-123!"}
+
+### Login: copie token da resposta para a variável acima somente na cópia local
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"email":"exemplo@example.com","senha":"Senha-exemplo-123!"}
+
+### Usuários (administrador lista perfis; usuário comum vê apenas a si)
+GET {{base}}/usuarios
+Authorization: Bearer {{token}}
+
+### Conta
+POST {{base}}/contas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Conta principal","tipo":"corrente","saldo_inicial":"1000.00","ativa":true}
+
+### Categoria receita
+POST {{base}}/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Salário","tipo":"receita"}
+
+### Categoria despesa
+POST {{base}}/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Alimentação","tipo":"despesa"}
+
+### Receita
+POST {{base}}/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"conta_id":{{contaId}},"categoria_id":{{categoriaReceitaId}},"descricao":"Salário","valor":"500.00","tipo":"receita","data_transacao":"2026-09-04"}
+
+### Despesa
+POST {{base}}/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"conta_id":{{contaId}},"categoria_id":{{categoriaDespesaId}},"descricao":"Mercado","valor":"150.00","valor_previsto":"200.00","tipo":"despesa","data_transacao":"2026-09-04"}
+
+### Filtros por usuário, tipo, categoria e período
+GET {{base}}/transacoes?usuario_id={{usuarioId}}&tipo=despesa&categoria_id={{categoriaDespesaId}}&data_inicio=2026-09-01&data_fim=2026-09-30
+Authorization: Bearer {{token}}
+
+### Alteração (confira transacaoId)
+PUT {{base}}/transacoes/{{transacaoId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"conta_id":{{contaId}},"categoria_id":{{categoriaDespesaId}},"descricao":"Mercado editado","valor":"175.00","tipo":"despesa","data_transacao":"2026-09-04","observacao":"Conferido","valor_previsto":"200.00"}
+
+### Saldo calculado
+GET {{base}}/contas/{{contaId}}/saldo
+Authorization: Bearer {{token}}
+
+### Resumo mensal
+GET {{base}}/usuarios/{{usuarioId}}/resumo?data_inicio=2026-09-01&data_fim=2026-09-30
+Authorization: Bearer {{token}}
+
+### Exclusão: execute apenas sobre o lançamento de teste identificado
+DELETE {{base}}/transacoes/{{transacaoId}}
+Authorization: Bearer {{token}}
+
+### Deve rejeitar consulta de outro usuário (substitua pelo ID de outro perfil)
+GET {{base}}/usuarios/2147483647/transacoes
+Authorization: Bearer {{token}}
+
+### Recibos de migração
+GET {{base}}/migracoes/localstorage
+Authorization: Bearer {{token}}
+
+### Logout (revoga tokens existentes)
+POST {{base}}/auth/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}

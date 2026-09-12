@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#102c3a" />
+  <title>Meu Controle Financeiro</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <section class="auth-screen" id="authScreen" aria-labelledby="authTitle">
+    <div class="auth-visual"><div class="auth-brand"><span class="brand-mark">R$</span><div><strong>Meu Controle</strong><small>Suas finanças, somente suas</small></div></div><figure class="login-art"><img id="loginImage" src="assets/finance-1.svg" alt="Ilustração de planejamento financeiro com calendário, orçamento e gráficos" width="640" height="440" fetchpriority="high" decoding="async"><figcaption>Privacidade e controle sobre suas informações.</figcaption></figure><p class="privacy-caption">Seus dados financeiros permanecem vinculados à sua conta.</p></div>
+    <div class="auth-card"><p class="eyebrow">Acesso protegido</p><h1 id="authTitle">Entre na sua conta</h1><p class="auth-copy">Seus registros são armazenados com segurança e protegidos por sua conta, garantindo mais privacidade e controle sobre suas informações.</p>
+      <div class="auth-tabs" role="tablist"><button class="active" type="button" data-auth-tab="login">Entrar</button><button type="button" data-auth-tab="register">Criar conta</button></div>
+      <form id="loginForm" class="auth-form"><label>E-mail<input name="email" type="email" autocomplete="username" required></label><label>Senha<input name="password" type="password" autocomplete="current-password" minlength="8" required></label><p class="form-message" id="loginMessage" role="alert"></p><button class="button" type="submit">Entrar com segurança</button><button class="text-btn" type="button" id="forgotPasswordBtn">Esqueci minha senha</button></form>
+      <form id="registerForm" class="auth-form" hidden><label>Nome<input name="name" autocomplete="name" maxlength="80" required></label><label>E-mail<input name="email" type="email" autocomplete="email" required></label><label>Senha<input name="password" type="password" autocomplete="new-password" minlength="8" required></label><small>Use pelo menos 8 caracteres. A administração é configurada pelo responsável pelo sistema.</small><p class="form-message" id="registerMessage" role="alert"></p><button class="button" type="submit">Criar minha conta</button></form>
+      <form id="forgotPasswordForm" class="auth-form" hidden><label>E-mail<input name="email" type="email" autocomplete="email" maxlength="150" required></label><p class="form-message" id="forgotMessage" role="status"></p><button class="button" type="submit">Enviar instruções</button><button class="text-btn" type="button" data-back-login>Voltar ao login</button></form>
+      <form id="resetPasswordForm" class="auth-form" hidden><label>Nova senha<input name="password" type="password" autocomplete="new-password" minlength="8" required disabled></label><label>Confirmar nova senha<input name="confirmation" type="password" autocomplete="new-password" minlength="8" required disabled></label><small>Use pelo menos 8 caracteres e no máximo 72 bytes.</small><p class="form-message" id="resetMessage" role="status"></p><button class="button" type="submit" disabled>Redefinir senha</button><button class="text-btn" type="button" data-back-login>Voltar ao login</button></form>
+    </div>
+  </section>
+  <div id="appShell" hidden>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">R$</span><div><strong>Meu Controle</strong><small>Finanças pessoais</small></div></div>
+    <nav id="nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-view="dashboard">Visão geral</button>
+      <button class="nav-item" data-view="revenues">Receitas</button>
+      <button class="nav-item" data-view="categories">Categorias</button>
+      <button class="nav-item" data-view="expenses">Despesas</button>
+      <button class="nav-item" data-view="investments">Investimentos</button>
+      <button class="nav-item" data-view="accounts">Contas</button>
+      <button class="nav-item" data-view="goals">Metas</button>
+      <button class="nav-item" data-view="notes">Notas</button>
+      <button class="nav-item admin-only" data-view="profiles">Perfis</button>
+    </nav>
+    <div class="sidebar-footer"><span class="save-dot"></span> Privacidade e controle</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div><p class="eyebrow" id="today"></p><h1 id="page-title">Visão geral</h1></div>
+      <div class="header-actions"><div class="user-menu"><button class="button ghost" id="userMenuBtn" aria-expanded="false"><span id="currentUserName"></span> ⌔</button><div class="user-popover" id="userPopover" hidden><small id="currentUserEmail"></small><button type="button" id="editOwnProfile">Editar perfil</button><button type="button" id="logoutBtn">Sair</button></div></div><button class="button" id="primaryAction">Adicionar despesa</button></div>
+    </header>
+
+    <div class="section-intro data-toolbar"><label>Mês de referência <input id="monthFilter" type="month" min="1000-01" max="9999-12" required></label><div><button class="button ghost" id="refreshData">Atualizar dados</button> <button class="button ghost" id="migrationButton">Importar dados locais</button> <button class="text-btn" id="legacyMigrationButton">Migrar dados deste navegador</button></div></div>
+    <p id="syncStatus" role="status" aria-live="polite"></p>
+    <section class="view active" id="dashboard-view">
+      <div class="balance-panel">
+        <div><span>Saldo livre do mês</span><strong id="freeBalance">R$ 0,00</strong><small id="freeHint"></small></div>
+        <div class="income-editor"><label for="incomeInput">Renda realizada</label><div><span>R$</span><input id="incomeInput" inputmode="decimal" aria-label="Renda realizada" /></div></div>
+      </div>
+      <div class="metric-grid">
+        <article class="metric-card"><span>Despesas</span><strong id="expenseTotal"></strong><small id="expensePct"></small></article>
+        <article class="metric-card"><span>Aportes planejados</span><strong id="contributionTotal"></strong><small id="contributionPct"></small></article>
+        <article class="metric-card"><span>Patrimônio</span><strong id="wealthTotal"></strong><small id="wealthAfter"></small></article>
+        <article class="metric-card"><span>Distribuído em contas</span><strong id="accountTotal"></strong><small id="reconcileStatus"></small></article>
+      </div>
+      <div class="dashboard-grid">
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">Para onde vai o dinheiro</p><h2>Orçamento do mês</h2></div></div><div id="budgetBars" class="bar-list"></div><h3>Despesas por categoria</h3><div id="categoryBars" class="bar-list"></div></article>
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">Progresso</p><h2>Metas em foco</h2></div><button class="text-btn" data-go="goals">Ver todas</button></div><div id="goalPreview" class="goal-list"></div></article>
+      </div>
+      <article class="panel"><div class="panel-head"><div><p class="eyebrow">Atenção</p><h2>Conferências automáticas</h2></div></div><div id="checks" class="checks"></div></article>
+    </section>
+
+    <section class="view" id="revenues-view"><div class="section-intro"><h2>Receitas do mês</h2></div><div id="revenueList" class="data-list"></div></section>
+    <section class="view" id="categories-view"><div class="section-intro"><h2>Categorias</h2></div><div id="categoryList" class="data-list"></div></section>
+    <section class="view" id="expenses-view"><div class="section-intro"><div><p class="eyebrow">Planejado x realizado</p><h2>Despesas mensais</h2></div><input class="search" id="expenseSearch" type="search" placeholder="Buscar despesa..." /></div><div id="expenseList" class="data-list"></div></section>
+    <section class="view" id="investments-view"><div class="investment-summary"><div><span>Valor total investido</span><strong id="investmentGrandTotal">R$ 0,00</strong></div><div><span>Total após os aportes</span><strong id="investmentProjectedTotal">R$ 0,00</strong></div></div><div class="section-intro"><div><p class="eyebrow">Evolução do patrimônio</p><h2>Projeção aporte a aporte</h2></div></div><div id="investmentProjection" class="projection-list"></div><div class="section-intro investment-list-title"><div><p class="eyebrow">Caixinhas</p><h2>Seus investimentos</h2></div></div><div id="investmentList" class="card-grid"></div></section>
+    <section class="view" id="accounts-view"><div class="section-intro"><div><p class="eyebrow">Conciliação</p><h2>Distribuição bancária</h2></div></div><div id="accountList" class="data-list"></div></section>
+    <section class="view" id="goals-view"><div class="section-intro"><div><p class="eyebrow">Planos com prazo</p><h2>Metas financeiras</h2></div></div><div id="goalList" class="card-grid"></div></section>
+    <section class="view" id="notes-view"><div class="section-intro"><div><p class="eyebrow">Memória do mês</p><h2>Notas e decisões</h2></div></div><article class="panel notes-panel"><label for="notesInput">Registre vencimentos, decisões, gastos que precisam de atenção e aprendizados.</label><div id="noteTitleField" class="field" hidden><label for="noteTitle">Título da nota</label><input id="noteTitle" type="text" maxlength="150" placeholder="Digite o título da nota" disabled></div><div class="note-tools"><label for="noteSelect">Nota</label><select id="noteSelect"></select><button class="text-btn" id="newNote" type="button">Nova nota</button></div><p id="noteEmpty" hidden>Nenhuma nota ainda. Clique em Nova nota para começar.</p><textarea id="notesInput" placeholder="Escreva aqui..."></textarea><small>Salvamento automático</small><small id="noteSaveStatus" role="status" aria-live="polite"></small></article></section>
+    <section class="view" id="profiles-view"><div class="section-intro"><div><p class="eyebrow">Administração</p><h2>Perfis de acesso</h2></div><button class="button" id="addProfileBtn">Criar perfil</button></div><p class="security-note">Cada perfil acessa somente os próprios dados financeiros. Administradores gerenciam contas, mas não visualizam os registros financeiros de outros usuários.</p><div id="profileList" class="data-list"></div></section>
+  </main>
+
+  <dialog id="itemDialog"><form method="dialog" id="itemForm"><div class="dialog-head"><div><p class="eyebrow">Novo registro</p><h2 id="dialogTitle">Adicionar</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div><div id="formFields" class="form-fields"></div><p id="itemMessage" class="form-message" role="alert"></p><div class="dialog-actions"><button class="button ghost" value="cancel">Cancelar</button><button class="button" id="saveItem" value="default">Salvar</button></div></form></dialog>
+  <dialog id="profileDialog"><form method="dialog" id="profileForm"><div class="dialog-head"><div><p class="eyebrow">Acesso</p><h2 id="profileDialogTitle">Criar perfil</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div><div class="form-fields"><div class="field full"><label for="profileName">Nome</label><input id="profileName" name="name" maxlength="80" required></div><div class="field full"><label for="profileEmail">E-mail</label><input id="profileEmail" name="email" type="email" required></div><div class="field"><label for="profileRole">Perfil</label><select id="profileRole" name="role"><option value="user">Usuário comum</option><option value="admin">Administrador</option></select></div><div class="field"><label for="profilePassword">Nova senha</label><input id="profilePassword" name="password" type="password" minlength="8"><small id="passwordHint">Mínimo de 8 caracteres</small></div></div><p class="form-message" id="profileMessage" role="alert"></p><div class="dialog-actions"><button class="button ghost" value="cancel">Cancelar</button><button class="button" value="default">Salvar perfil</button></div></form></dialog>
+  <dialog id="migrationDialog"><form id="migrationForm"><div class="dialog-head"><h2>Importar dados locais</h2><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div><p id="migrationInfo"></p><div class="form-fields"><div class="field"><label for="migrationDate">Data de referência</label><input id="migrationDate" type="date" required></div><div class="field"><label for="legacyPassword">Senha do perfil antigo (verificada neste navegador)</label><input id="legacyPassword" type="password" autocomplete="off" required></div></div><p id="migrationMessage" class="form-message" role="alert"></p><div class="dialog-actions"><button class="button ghost" value="cancel">Cancelar</button><button class="button" type="submit">Confirmar importação</button></div></form></dialog>
+  <script src="js/api.js"></script>
+  <script src="app.js"></script>
+  <script src="js/migration.js"></script>
+  <script src="js/ux.js"></script>
+  <script src="js/controller.js"></script>
+  <script src="js/import-schema.js"></script>
+  <script src="js/import.js"></script>
+  <script src="js/password-reset.js"></script>
+  </div>
+</body>
+</html>

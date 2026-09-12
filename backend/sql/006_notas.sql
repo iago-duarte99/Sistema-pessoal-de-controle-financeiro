@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS notas (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ usuario_id INT NOT NULL,
+ legado BOOLEAN NULL,
+ titulo VARCHAR(150) NULL,
+ conteudo TEXT NOT NULL,
+ criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ UNIQUE KEY nota_legada(usuario_id,legado),
+ INDEX nota_usuario(usuario_id,atualizado_em)
+) ENGINE=InnoDB;
