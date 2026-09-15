@@ -32,6 +32,7 @@ export function email(value) {
 }
 export function password(value) {
   if (typeof value !== 'string' || value.length < 8 || Buffer.byteLength(value) > 72) invalid('Senha deve ter no mínimo 8 caracteres e no máximo 72 bytes.');
+  if (!value.trim()) invalid('Senha não pode ser vazia.');
   return value;
 }
 export function period(query) {

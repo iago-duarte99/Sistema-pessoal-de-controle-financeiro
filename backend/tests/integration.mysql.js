@@ -26,6 +26,10 @@ test('API e frontend contra MySQL real isolado',{skip:process.env.MYSQL_INTEGRAT
     await t.test('conexão, cadastro, hash e login',async()=>{
       await request('/health');
       admin=await request('/auth/register',{method:'POST',body:{nome:'Administrador teste',email:'admin-test@example.test',senha:password},status:201});
+      assert.equal(admin.user.role,'user');
+      // Provisionamento explícito da fixture somente no banco de teste isolado.
+      await pool.execute("UPDATE app_perfis SET papel='admin' WHERE usuario_id=?",[admin.user.id]);
+      admin=await request('/auth/login',{method:'POST',body:{email:admin.user.email,senha:password}});
       assert.equal(admin.user.role,'admin');
       user=await request('/auth/register',{method:'POST',body:{nome:'Usuário teste',email:'user-test@example.test',senha:password,role:'admin'},status:201});
       assert.equal(user.user.role,'user');

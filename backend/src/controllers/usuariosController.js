@@ -1,7 +1,6 @@
 import { available } from '../services/relational.js';
 import bcrypt from 'bcryptjs';
 import { pool, transaction } from '../config/database.js';
-import { config } from '../config/env.js';
 import { HttpError } from '../middleware/errors.js';
 import { admin, tokenFor, publicUser } from '../middleware/auth.js';
 import * as v from '../services/validation.js';
@@ -10,7 +9,7 @@ const select = 'SELECT u.id,u.nome,u.email,u.criado_em,COALESCE(p.papel,\'user\'
 export async function create(body, administrator = false) {
   const nome = v.text(body.nome, 'nome', 120), email = v.email(body.email);
   const hash = await bcrypt.hash(v.password(body.senha), 12);
-  let role = administrator ? (body.role || 'user') : (config.adminEmail && email === config.adminEmail ? 'admin' : 'user');
+  const role = administrator ? (body.role || 'user') : 'user';
   if (!['admin', 'user'].includes(role)) v.invalid('Perfil inválido.');
   return transaction(async db => {
     const [result] = await db.execute('INSERT INTO usuarios(nome,email,senha_hash) VALUES(?,?,?)', [nome, email, hash]);

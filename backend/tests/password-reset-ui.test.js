@@ -17,17 +17,52 @@ function setup(path, post) {
 function submit(dom, form) { form.dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); }
 
 test('solicitação mostra loading, resposta genérica e retorno ao login', async () => {
-  let finish;
-  const dom = setup('/', () => new Promise(resolve => { finish = resolve; }));
+  let finish, calls = 0;
+  const dom = setup('/', () => { calls++; return new Promise(resolve => { finish = resolve; }); });
   try {
     const doc = dom.window.document, form = doc.querySelector('#forgotPasswordForm');
     doc.querySelector('#forgotPasswordBtn').click(); assert.equal(form.hidden, false);
     form.elements.email.value = 'example@example.test'; submit(dom, form);
     assert.equal(form.querySelector('[type=submit]').disabled, true);
+    assert.equal(form.querySelector('[type=submit]').textContent, 'Enviando...');
+    submit(dom, form); assert.equal(calls, 1);
     finish({ message: 'Mensagem genérica' }); await tick();
-    assert.equal(doc.querySelector('#forgotMessage').textContent, 'Mensagem genérica');
+    assert.equal(doc.querySelector('#forgotMessage').textContent, 'Solicitação recebida. Se existir uma conta com este e-mail, enviaremos as instruções de recuperação.');
+    assert.equal(doc.querySelector('#forgotMessage').dataset.state, 'success');
+    assert.equal(doc.querySelector('#forgotMessage').getAttribute('role'), 'status');
     assert.equal(form.querySelector('[type=submit]').disabled, false);
+    assert.equal(form.querySelector('[type=submit]').textContent, 'Enviar instruções');
     form.querySelector('[data-back-login]').click(); assert.equal(form.hidden, true);
+  } finally { dom.window.close(); }
+});
+
+test('erro técnico é amigável e restaura botão para nova tentativa', async () => {
+  let calls = 0;
+  const dom = setup('/', async () => { calls++; throw new Error('Detalhe interno simulado'); });
+  try {
+    const doc = dom.window.document, form = doc.querySelector('#forgotPasswordForm');
+    doc.querySelector('#forgotPasswordBtn').click();
+    submit(dom, form); await tick();
+    assert.equal(doc.querySelector('#forgotMessage').textContent, 'Não foi possível confirmar a solicitação. Tente novamente em instantes.');
+    assert.equal(doc.querySelector('#forgotMessage').dataset.state, 'error');
+    assert.equal(form.querySelector('[type=submit]').disabled, false);
+    assert.equal(form.querySelector('[type=submit]').textContent, 'Enviar instruções');
+    submit(dom, form); await tick(); assert.equal(calls, 2);
+  } finally { dom.window.close(); }
+});
+
+test('resposta tardia não reaparece após sair da recuperação', async () => {
+  let finish;
+  const dom = setup('/', () => new Promise(resolve => { finish = resolve; }));
+  try {
+    const doc = dom.window.document, form = doc.querySelector('#forgotPasswordForm');
+    doc.querySelector('#forgotPasswordBtn').click(); submit(dom, form);
+    form.querySelector('[data-back-login]').click();
+    doc.querySelector('#forgotPasswordBtn').click();
+    finish({}); await tick();
+    assert.equal(doc.querySelector('#forgotMessage').textContent, '');
+    assert.equal(form.querySelector('[type=submit]').disabled, false);
+    assert.equal(form.querySelector('[type=submit]').textContent, 'Enviar instruções');
   } finally { dom.window.close(); }
 });
 

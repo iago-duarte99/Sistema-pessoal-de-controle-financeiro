@@ -4,6 +4,23 @@ import nodemailer from 'nodemailer';
 import { resetMail } from '../src/services/resetMail.js';
 import { passwordResetController } from '../src/controllers/passwordResetController.js';
 
+test('conta existente e inexistente recebem a mesma confirmação sem token ou link', async () => {
+  const responses = [];
+  let deliveries = 0;
+  for (const exists of [true, false]) {
+    const controller = passwordResetController({
+      transact: work => work({ execute: async sql => [sql.startsWith('SELECT') ? (exists ? [{ id: 1, email: 'test@example.test' }] : []) : {}] }),
+      deliver: async () => { deliveries++; },
+      report: () => assert.fail('Não deve falhar')
+    });
+    await controller.forgot({ body: { email: 'test@example.test' } }, { json: value => responses.push(value) });
+  }
+  assert.deepEqual(responses[0], responses[1]);
+  assert.deepEqual(Object.keys(responses[0]), ['message']);
+  assert.match(responses[0].message, /^Se existir uma conta/);
+  assert.equal(deliveries, 1);
+});
+
 test('sem SMTP, somente development informa configuração ausente sem revelar link ou token', async () => {
   for (const environment of ['production', 'test', undefined, 'development']) {
     const logs = [], send = resetMail({ environment: environment || 'unset', smtp: {}, appUrl: 'http://localhost:3000', log: value => logs.push(value) });

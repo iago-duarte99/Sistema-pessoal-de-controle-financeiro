@@ -19,16 +19,28 @@
     document.querySelector('#authTitle').textContent = title;
   }
   document.querySelector('#forgotPasswordBtn').addEventListener('click', () => {
-    open(forgot, 'Recuperar senha'); document.querySelector('#forgotMessage').textContent = ''; forgot.elements.email.focus();
+    open(forgot, 'Recuperar senha'); document.querySelector('#forgotMessage').textContent = ''; document.querySelector('#forgotMessage').removeAttribute('data-state'); forgot.elements.email.focus();
   });
   forgot.addEventListener('submit', async event => {
     event.preventDefault(); const button = forgot.querySelector('[type=submit]');
     if (button.disabled) return;
-    button.disabled = true; const current = generation;
-    const message = document.querySelector('#forgotMessage'); message.textContent = 'Enviando…';
-    try { const result = await api.post('/auth/forgot-password', { email: forgot.elements.email.value }); if (current === generation) message.textContent = result.message; }
-    catch (error) { if (current === generation) message.textContent = error.message; }
-    finally { button.disabled = false; }
+    const label = button.textContent;
+    button.disabled = true; button.textContent = 'Enviando...'; const current = generation;
+    const message = document.querySelector('#forgotMessage'); message.removeAttribute('data-state'); message.textContent = 'Enviando...';
+    try {
+      await api.post('/auth/forgot-password', { email: forgot.elements.email.value });
+      if (current === generation) {
+        message.dataset.state = 'success';
+        message.textContent = 'Solicitação recebida. Se existir uma conta com este e-mail, enviaremos as instruções de recuperação.';
+      }
+    }
+    catch {
+      if (current === generation) {
+        message.dataset.state = 'error';
+        message.textContent = 'Não foi possível confirmar a solicitação. Tente novamente em instantes.';
+      }
+    }
+    finally { button.disabled = false; button.textContent = label; }
   });
   reset.addEventListener('submit', async event => {
     event.preventDefault(); const button = reset.querySelector('[type=submit]');

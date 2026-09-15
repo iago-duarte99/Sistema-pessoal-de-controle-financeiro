@@ -62,7 +62,7 @@ Para gerar `JWT_SECRET` em uma nova instalação:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-Copie a saída para `.env`. Defina `ADMIN_EMAIL` com seu e-mail antes de cadastrar o primeiro administrador. Faça esse cadastro localmente antes de expor o serviço a terceiros: esta versão não verifica a posse do e-mail. Outros cadastros públicos sempre recebem perfil comum, independentemente do papel enviado pelo navegador. Para uma conta já existente, há um comando de promoção manual comentado no SQL auxiliar. Administradores gerenciam perfis, mas não acessam finanças alheias.
+Copie a saída para `.env`. Cadastros públicos sempre recebem perfil comum, independentemente do e-mail ou dos campos de privilégio enviados pelo navegador. `ADMIN_EMAIL` não concede privilégios no cadastro público; a configuração antiga pode permanecer, mas não autoriza usuários. Para provisionar o primeiro administrador em uma instalação nova, há um comando de promoção manual comentado no SQL auxiliar, a ser executado pelo responsável pelo banco. Administradores existentes continuam gerenciando perfis pelo endpoint autenticado, mas não acessam finanças alheias.
 
 No MySQL Workbench, usando uma conexão administrativa:
 
