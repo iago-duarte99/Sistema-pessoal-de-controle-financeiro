@@ -7,6 +7,9 @@ import { api } from './routes/api.js';
 import { errorHandler, HttpError } from './middleware/errors.js';
 
 export const app=express();
+// Production ingress must have exactly one trusted proxy, with no direct public access.
+// Trust only the socket hop; ignore client-supplied addresses farther to the left.
+app.set('trust proxy', config.production ? 1 : false);
 app.disable('x-powered-by');
 app.use(helmet({contentSecurityPolicy:{directives:{'script-src':["'self'"],'style-src':["'self'","'unsafe-inline'"],'upgrade-insecure-requests':config.production?[]:null}},strictTransportSecurity:config.production?undefined:false}));
 app.use(cors({origin(origin,callback){callback(origin&&!config.origins.includes(origin)?new HttpError(403,'Origem não autorizada.'):null,true);}}));
